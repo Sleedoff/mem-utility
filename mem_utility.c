@@ -48,11 +48,11 @@ int parse_args(int argc, char* argv[]) {
         switch (opt) {
             case 'b':
                 beging_f = 1;
-                beging_reg = strtoull(optarg, NULL, 16);
+                beging_reg = (uint64_t) strtoull(optarg, NULL, 16);
                 break;
             case 'e':
                 end_f = 1;
-                end_reg = strtoull(optarg, NULL, 16);
+                end_reg = (uint64_t) strtoull(optarg, NULL, 16);
                 break;
             case 's':
                 reg_size = strtod(optarg, NULL);
@@ -99,13 +99,21 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < map_size*byte_size; i += byte_size) {
         printf("[%08lX] - 0x", beging_reg + i);
-        for (int j = 0; j < byte_size; j++) {
+        for (int j = byte_size; j >= 0; j--) {
             printf("%02X", vmap[i+j]);
         }
         printf("\n");
     }
 
-    munmap(vmap, map_size);
-    close(fd);
+    error = munmap(vmap, map_size);
+    if (error != 0) {
+        perror("Can not unmap /dev/mem");
+        return -1;
+    }
+    error = close(fd);
+    if (error != 0) {
+        perror("Can not close /dev/mem");
+        return -1;
+    }
     return 0;
 }
