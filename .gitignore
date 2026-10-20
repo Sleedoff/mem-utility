@@ -56,3 +56,4 @@ dkms.conf
 
 #my ignore
 build/
+mem_utility
